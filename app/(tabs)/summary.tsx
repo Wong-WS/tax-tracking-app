@@ -1,12 +1,41 @@
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useApp } from '@/context/AppContext';
+
+// Category color mapping
+const CATEGORY_COLORS: { [key: string]: string } = {
+  Office: '#3b82f6',
+  Software: '#8b5cf6',
+  Meals: '#ec4899',
+  Utilities: '#10b981',
+  Travel: '#f59e0b',
+  Marketing: '#ef4444',
+  Education: '#06b6d4',
+  Other: '#6b7280',
+};
 
 export default function SummaryScreen() {
-  // Mock data - will be replaced with real data later
-  const totalIncome = 5250;
-  const totalExpenses = 340.48;
+  const { income, expenses } = useApp();
+
+  // Calculate totals from real data
+  const totalIncome = income.reduce((sum, item) => sum + item.amount, 0);
+  const totalExpenses = expenses.reduce((sum, item) => sum + item.amount, 0);
   const netIncome = totalIncome - totalExpenses;
   const estimatedTax = netIncome * 0.25; // Simple 25% estimate
+
+  // Group expenses by category
+  const expensesByCategory = expenses.reduce((acc, expense) => {
+    if (!acc[expense.category]) {
+      acc[expense.category] = 0;
+    }
+    acc[expense.category] += expense.amount;
+    return acc;
+  }, {} as { [key: string]: number });
+
+  // Convert to array and sort by amount (highest first)
+  const categoryBreakdown = Object.entries(expensesByCategory)
+    .map(([category, amount]) => ({ category, amount }))
+    .sort((a, b) => b.amount - a.amount);
 
   return (
     <ScrollView style={styles.container}>
@@ -63,37 +92,32 @@ export default function SummaryScreen() {
       <View style={styles.categorySection}>
         <Text style={styles.sectionTitle}>Expense Breakdown</Text>
 
-        <View style={styles.categoryItem}>
-          <View style={styles.categoryLeft}>
-            <View style={[styles.categoryDot, { backgroundColor: '#3b82f6' }]} />
-            <Text style={styles.categoryName}>Office Supplies</Text>
+        {categoryBreakdown.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyText}>No expenses yet</Text>
           </View>
-          <Text style={styles.categoryAmount}>$125.50</Text>
-        </View>
-
-        <View style={styles.categoryItem}>
-          <View style={styles.categoryLeft}>
-            <View style={[styles.categoryDot, { backgroundColor: '#8b5cf6' }]} />
-            <Text style={styles.categoryName}>Software</Text>
-          </View>
-          <Text style={styles.categoryAmount}>$49.99</Text>
-        </View>
-
-        <View style={styles.categoryItem}>
-          <View style={styles.categoryLeft}>
-            <View style={[styles.categoryDot, { backgroundColor: '#ec4899' }]} />
-            <Text style={styles.categoryName}>Meals</Text>
-          </View>
-          <Text style={styles.categoryAmount}>$85.00</Text>
-        </View>
-
-        <View style={styles.categoryItem}>
-          <View style={styles.categoryLeft}>
-            <View style={[styles.categoryDot, { backgroundColor: '#10b981' }]} />
-            <Text style={styles.categoryName}>Utilities</Text>
-          </View>
-          <Text style={styles.categoryAmount}>$79.99</Text>
-        </View>
+        ) : (
+          categoryBreakdown.map((item, index) => (
+            <View
+              key={item.category}
+              style={[
+                styles.categoryItem,
+                index === categoryBreakdown.length - 1 && styles.categoryItemLast
+              ]}
+            >
+              <View style={styles.categoryLeft}>
+                <View
+                  style={[
+                    styles.categoryDot,
+                    { backgroundColor: CATEGORY_COLORS[item.category] || CATEGORY_COLORS.Other }
+                  ]}
+                />
+                <Text style={styles.categoryName}>{item.category}</Text>
+              </View>
+              <Text style={styles.categoryAmount}>${item.amount.toLocaleString()}</Text>
+            </View>
+          ))
+        )}
       </View>
     </ScrollView>
   );
@@ -265,5 +289,16 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
     color: '#1e293b',
+  },
+  categoryItemLast: {
+    borderBottomWidth: 0,
+  },
+  emptyState: {
+    paddingVertical: 32,
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontSize: 14,
+    color: '#94a3b8',
   },
 });

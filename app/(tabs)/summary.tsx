@@ -1,21 +1,19 @@
+import { useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '@/context/AppContext';
 
-// Category color mapping
-const CATEGORY_COLORS: { [key: string]: string } = {
-  Office: '#3b82f6',
-  Software: '#8b5cf6',
-  Meals: '#ec4899',
-  Utilities: '#10b981',
-  Travel: '#f59e0b',
-  Marketing: '#ef4444',
-  Education: '#06b6d4',
-  Other: '#6b7280',
-};
-
 export default function SummaryScreen() {
-  const { income, expenses } = useApp();
+  const { income, expenses, expenseCategories } = useApp();
+
+  // Build dynamic color map from categories
+  const categoryColors = useMemo(() => {
+    const colors: { [key: string]: string } = {};
+    expenseCategories.forEach(cat => {
+      colors[cat.name] = cat.color;
+    });
+    return colors;
+  }, [expenseCategories]);
 
   // Calculate totals from real data
   const totalIncome = income.reduce((sum, item) => sum + item.amount, 0);
@@ -109,7 +107,7 @@ export default function SummaryScreen() {
                 <View
                   style={[
                     styles.categoryDot,
-                    { backgroundColor: CATEGORY_COLORS[item.category] || CATEGORY_COLORS.Other }
+                    { backgroundColor: categoryColors[item.category] || '#6b7280' }
                   ]}
                 />
                 <Text style={styles.categoryName}>{item.category}</Text>

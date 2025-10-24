@@ -18,39 +18,20 @@ interface TransactionFormProps {
   mode: 'add' | 'edit';
 }
 
-const INCOME_CATEGORIES = [
-  'Freelance',
-  'Consulting',
-  'Salary',
-  'Investment',
-  'Business',
-  'Other',
-];
-
-const EXPENSE_CATEGORIES = [
-  'Office',
-  'Software',
-  'Meals',
-  'Utilities',
-  'Travel',
-  'Marketing',
-  'Education',
-  'Other',
-];
-
 export default function TransactionForm({ type, mode }: TransactionFormProps) {
-  const { addIncome, updateIncome, addExpense, updateExpense } = useApp();
+  const { addIncome, updateIncome, addExpense, updateExpense, incomeCategories, expenseCategories } = useApp();
   const params = useLocalSearchParams();
+
+  const categories = type === 'income' ? incomeCategories : expenseCategories;
+
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [category, setCategory] = useState(
-    type === 'income' ? 'Freelance' : 'Office'
+    categories[0]?.name || ''
   );
   const [transactionId, setTransactionId] = useState('');
-
-  const categories = type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
   const isIncome = type === 'income';
   const isEdit = mode === 'edit';
 
@@ -209,23 +190,23 @@ export default function TransactionForm({ type, mode }: TransactionFormProps) {
           <View style={styles.categoryContainer}>
             {categories.map((cat) => (
               <TouchableOpacity
-                key={cat}
+                key={cat.id}
                 style={[
                   styles.categoryChip,
-                  category === cat && [
+                  category === cat.name && [
                     styles.categoryChipActive,
                     { backgroundColor: config.saveColor, borderColor: config.saveColor },
                   ],
                 ]}
-                onPress={() => setCategory(cat)}
+                onPress={() => setCategory(cat.name)}
               >
                 <Text
                   style={[
                     styles.categoryChipText,
-                    category === cat && styles.categoryChipTextActive,
+                    category === cat.name && styles.categoryChipTextActive,
                   ]}
                 >
-                  {cat}
+                  {cat.name}
                 </Text>
               </TouchableOpacity>
             ))}

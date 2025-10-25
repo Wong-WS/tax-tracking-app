@@ -25,7 +25,7 @@ interface TransactionFormProps {
 
 export default function TransactionForm({ type, mode }: TransactionFormProps) {
   const { addIncome, updateIncome, addExpense, updateExpense, incomeCategories, expenseCategories } = useApp();
-  const { theme } = useTheme();
+  const { theme, isDark } = useTheme();
   const params = useLocalSearchParams();
   const descriptionInputRef = useRef<TextInput>(null);
   const originalAttachmentsRef = useRef<Attachment[]>([]);
@@ -234,6 +234,7 @@ export default function TransactionForm({ type, mode }: TransactionFormProps) {
               mode="date"
               display={Platform.OS === 'ios' ? 'spinner' : 'default'}
               onChange={onDateChange}
+              themeVariant={isDark ? 'dark' : 'light'}
             />
           )}
         </View>

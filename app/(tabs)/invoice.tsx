@@ -24,7 +24,7 @@ import { Attachment } from '@/context/AppContext';
 
 export default function InvoiceScreen() {
   const { addIncome } = useApp();
-  const { theme } = useTheme();
+  const { theme, isDark } = useTheme();
   const clientNameInputRef = useRef<TextInput>(null);
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -336,6 +336,7 @@ export default function InvoiceScreen() {
             display="default"
             onChange={handleDateChange}
             maximumDate={new Date()}
+            themeVariant={isDark ? 'dark' : 'light'}
           />
         )}
 

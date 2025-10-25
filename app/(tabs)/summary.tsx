@@ -16,23 +16,36 @@ export default function SummaryScreen() {
   }, [expenseCategories]);
 
   // Calculate totals from real data
-  const totalIncome = income.reduce((sum, item) => sum + item.amount, 0);
-  const totalExpenses = expenses.reduce((sum, item) => sum + item.amount, 0);
-  const netIncome = totalIncome - totalExpenses;
+  const totalIncome = useMemo(
+    () => income.reduce((sum, item) => sum + item.amount, 0),
+    [income]
+  );
 
-  // Group expenses by category
-  const expensesByCategory = expenses.reduce((acc, expense) => {
-    if (!acc[expense.category]) {
-      acc[expense.category] = 0;
-    }
-    acc[expense.category] += expense.amount;
-    return acc;
-  }, {} as { [key: string]: number });
+  const totalExpenses = useMemo(
+    () => expenses.reduce((sum, item) => sum + item.amount, 0),
+    [expenses]
+  );
 
-  // Convert to array and sort by amount (highest first)
-  const categoryBreakdown = Object.entries(expensesByCategory)
-    .map(([category, amount]) => ({ category, amount }))
-    .sort((a, b) => b.amount - a.amount);
+  const netIncome = useMemo(
+    () => totalIncome - totalExpenses,
+    [totalIncome, totalExpenses]
+  );
+
+  // Group expenses by category and sort
+  const categoryBreakdown = useMemo(() => {
+    const expensesByCategory = expenses.reduce((acc, expense) => {
+      if (!acc[expense.category]) {
+        acc[expense.category] = 0;
+      }
+      acc[expense.category] += expense.amount;
+      return acc;
+    }, {} as { [key: string]: number });
+
+    // Convert to array and sort by amount (highest first)
+    return Object.entries(expensesByCategory)
+      .map(([category, amount]) => ({ category, amount }))
+      .sort((a, b) => b.amount - a.amount);
+  }, [expenses]);
 
   return (
     <ScrollView style={styles.container}>

@@ -2,6 +2,8 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Category, DEFAULT_INCOME_CATEGORIES, DEFAULT_EXPENSE_CATEGORIES } from '@/constants/categories';
 import { deleteTransactionReceipts } from '@/utils/fileStorage';
+import { validateTransactions } from '@/utils/validation/transactionValidator';
+import { generateId } from '@/hooks/useId';
 
 // Types
 export interface Attachment {
@@ -78,11 +80,38 @@ export function AppProvider({ children }: { children: ReactNode }) {
         AsyncStorage.getItem(STORAGE_KEYS.EXPENSE_CATEGORIES),
       ]);
 
+      // Validate and load income data
       if (incomeData) {
-        setIncome(JSON.parse(incomeData));
+        try {
+          const parsed = JSON.parse(incomeData);
+          const validated = validateTransactions(parsed);
+          setIncome(validated);
+
+          // Log if any transactions were filtered out
+          if (validated.length !== parsed.length) {
+            console.warn(`Filtered out ${parsed.length - validated.length} invalid income transactions`);
+          }
+        } catch (error) {
+          console.error('Error parsing income data:', error);
+          setIncome([]);
+        }
       }
+
+      // Validate and load expense data
       if (expensesData) {
-        setExpenses(JSON.parse(expensesData));
+        try {
+          const parsed = JSON.parse(expensesData);
+          const validated = validateTransactions(parsed);
+          setExpenses(validated);
+
+          // Log if any transactions were filtered out
+          if (validated.length !== parsed.length) {
+            console.warn(`Filtered out ${parsed.length - validated.length} invalid expense transactions`);
+          }
+        } catch (error) {
+          console.error('Error parsing expense data:', error);
+          setExpenses([]);
+        }
       }
 
       // Load or initialize categories
@@ -136,11 +165,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     };
     saveExpenses();
   }, [expenses, isLoading]);
-
-  // Helper function to generate unique IDs
-  const generateId = () => {
-    return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-  };
 
   // Income CRUD operations
   const addIncome = (newIncome: Omit<Transaction, 'id'>) => {

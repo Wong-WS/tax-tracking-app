@@ -26,6 +26,7 @@ export default function TransactionForm({ type, mode }: TransactionFormProps) {
   const { addIncome, updateIncome, addExpense, updateExpense, incomeCategories, expenseCategories } = useApp();
   const params = useLocalSearchParams();
   const descriptionInputRef = useRef<TextInput>(null);
+  const originalAttachmentsRef = useRef<Attachment[]>([]);
 
   const categories = type === 'income' ? incomeCategories : expenseCategories;
 
@@ -72,6 +73,8 @@ export default function TransactionForm({ type, mode }: TransactionFormProps) {
           setCategory(data.category);
           if (data.attachments) {
             setAttachments(data.attachments);
+            // Store original attachments for cleanup comparison
+            originalAttachmentsRef.current = data.attachments;
           }
         } catch (error) {
           console.error('Error parsing transaction data:', error);
@@ -92,7 +95,7 @@ export default function TransactionForm({ type, mode }: TransactionFormProps) {
     }
   }, [isEdit]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     // Validation
     if (!description.trim()) {
       Alert.alert('Error', 'Please enter a description');
@@ -107,6 +110,17 @@ export default function TransactionForm({ type, mode }: TransactionFormProps) {
     if (!isIncome && attachments.length === 0) {
       Alert.alert('Receipt Required', 'Please attach at least one receipt or invoice for this expense.');
       return;
+    }
+
+    // If editing an expense, clean up removed attachments
+    if (isEdit && !isIncome && originalAttachmentsRef.current.length > 0) {
+      const removedAttachments = originalAttachmentsRef.current.filter(
+        original => !attachments.some(current => current.id === original.id)
+      );
+
+      if (removedAttachments.length > 0) {
+        await deleteTransactionReceipts(removedAttachments);
+      }
     }
 
     const transactionData = {
@@ -140,7 +154,7 @@ export default function TransactionForm({ type, mode }: TransactionFormProps) {
     router.back();
   };
 
-  const onDateChange = (event: any, selectedDate?: Date) => {
+  const onDateChange = (_event: unknown, selectedDate?: Date) => {
     setShowDatePicker(Platform.OS === 'ios');
     if (selectedDate) {
       setDate(selectedDate);

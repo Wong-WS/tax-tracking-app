@@ -2,9 +2,11 @@ import { useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '@/context/AppContext';
+import { useTheme } from '@/context/ThemeContext';
 
 export default function SummaryScreen() {
   const { income, expenses, expenseCategories } = useApp();
+  const { theme } = useTheme();
 
   // Build dynamic color map from categories
   const categoryColors = useMemo(() => {
@@ -48,51 +50,51 @@ export default function SummaryScreen() {
   }, [expenses]);
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Summary</Text>
-        <Text style={styles.headerSubtitle}>Your financial overview</Text>
+    <ScrollView style={[styles.container, { backgroundColor: theme.background }]}>
+      <View style={[styles.header, { backgroundColor: theme.surface }]}>
+        <Text style={[styles.headerTitle, { color: theme.text }]}>Summary</Text>
+        <Text style={[styles.headerSubtitle, { color: theme.textTertiary }]}>Your financial overview</Text>
       </View>
 
       {/* Net Income Card */}
-      <View style={styles.netIncomeCard}>
-        <Text style={styles.netIncomeLabel}>Net Income</Text>
+      <View style={[styles.netIncomeCard, { backgroundColor: theme.primary }]}>
+        <Text style={[styles.netIncomeLabel, { color: theme.primaryLight }]}>Net Income</Text>
         <Text style={styles.netIncomeAmount}>${netIncome.toLocaleString()}</Text>
-        <Text style={styles.netIncomeSubtext}>
+        <Text style={[styles.netIncomeSubtext, { color: theme.primaryLight }]}>
           After deductible expenses
         </Text>
       </View>
 
       {/* Summary Cards */}
       <View style={styles.cardsContainer}>
-        <View style={[styles.summaryCard, styles.incomeCard]}>
+        <View style={[styles.summaryCard, styles.incomeCard, { backgroundColor: theme.card, borderLeftColor: theme.success }]}>
           <View style={styles.cardIcon}>
-            <Ionicons name="trending-up" size={24} color="#16a34a" />
+            <Ionicons name="trending-up" size={24} color={theme.success} />
           </View>
-          <Text style={styles.cardLabel}>Total Income</Text>
-          <Text style={[styles.cardAmount, styles.incomeAmount]}>
+          <Text style={[styles.cardLabel, { color: theme.textSecondary }]}>Total Income</Text>
+          <Text style={[styles.cardAmount, { color: theme.success }]}>
             ${totalIncome.toLocaleString()}
           </Text>
         </View>
 
-        <View style={[styles.summaryCard, styles.expenseCard]}>
+        <View style={[styles.summaryCard, styles.expenseCard, { backgroundColor: theme.card, borderLeftColor: theme.error }]}>
           <View style={styles.cardIcon}>
-            <Ionicons name="receipt-outline" size={24} color="#dc2626" />
+            <Ionicons name="receipt-outline" size={24} color={theme.error} />
           </View>
-          <Text style={styles.cardLabel}>Total Expenses</Text>
-          <Text style={[styles.cardAmount, styles.expenseAmount]}>
+          <Text style={[styles.cardLabel, { color: theme.textSecondary }]}>Total Expenses</Text>
+          <Text style={[styles.cardAmount, { color: theme.error }]}>
             ${totalExpenses.toLocaleString()}
           </Text>
         </View>
       </View>
 
       {/* Breakdown by Category */}
-      <View style={styles.categorySection}>
-        <Text style={styles.sectionTitle}>Expense Breakdown</Text>
+      <View style={[styles.categorySection, { backgroundColor: theme.card }]}>
+        <Text style={[styles.sectionTitle, { color: theme.text }]}>Expense Breakdown</Text>
 
         {categoryBreakdown.length === 0 ? (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyText}>No expenses yet</Text>
+            <Text style={[styles.emptyText, { color: theme.textTertiary }]}>No expenses yet</Text>
           </View>
         ) : (
           categoryBreakdown.map((item, index) => (
@@ -100,6 +102,7 @@ export default function SummaryScreen() {
               key={item.category}
               style={[
                 styles.categoryItem,
+                { borderBottomColor: theme.borderLight },
                 index === categoryBreakdown.length - 1 && styles.categoryItemLast
               ]}
             >
@@ -107,12 +110,12 @@ export default function SummaryScreen() {
                 <View
                   style={[
                     styles.categoryDot,
-                    { backgroundColor: categoryColors[item.category] || '#6b7280' }
+                    { backgroundColor: categoryColors[item.category] || theme.textTertiary }
                   ]}
                 />
-                <Text style={styles.categoryName}>{item.category}</Text>
+                <Text style={[styles.categoryName, { color: theme.textSecondary }]}>{item.category}</Text>
               </View>
-              <Text style={styles.categoryAmount}>${item.amount.toLocaleString()}</Text>
+              <Text style={[styles.categoryAmount, { color: theme.text }]}>${item.amount.toLocaleString()}</Text>
             </View>
           ))
         )}
@@ -124,10 +127,8 @@ export default function SummaryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
   },
   header: {
-    backgroundColor: '#1e293b',
     padding: 24,
     paddingTop: 32,
     alignItems: 'center',
@@ -135,15 +136,12 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#ffffff',
     marginBottom: 4,
   },
   headerSubtitle: {
     fontSize: 14,
-    color: '#94a3b8',
   },
   netIncomeCard: {
-    backgroundColor: '#2563eb',
     margin: 16,
     padding: 24,
     borderRadius: 16,
@@ -156,7 +154,6 @@ const styles = StyleSheet.create({
   },
   netIncomeLabel: {
     fontSize: 14,
-    color: '#bfdbfe',
     marginBottom: 8,
   },
   netIncomeAmount: {
@@ -167,7 +164,6 @@ const styles = StyleSheet.create({
   },
   netIncomeSubtext: {
     fontSize: 13,
-    color: '#bfdbfe',
   },
   cardsContainer: {
     flexDirection: 'row',
@@ -177,7 +173,6 @@ const styles = StyleSheet.create({
   },
   summaryCard: {
     flex: 1,
-    backgroundColor: '#ffffff',
     padding: 16,
     borderRadius: 12,
     shadowColor: '#000',
@@ -188,32 +183,22 @@ const styles = StyleSheet.create({
   },
   incomeCard: {
     borderLeftWidth: 4,
-    borderLeftColor: '#16a34a',
   },
   expenseCard: {
     borderLeftWidth: 4,
-    borderLeftColor: '#dc2626',
   },
   cardIcon: {
     marginBottom: 8,
   },
   cardLabel: {
     fontSize: 13,
-    color: '#64748b',
     marginBottom: 4,
   },
   cardAmount: {
     fontSize: 22,
     fontWeight: 'bold',
   },
-  incomeAmount: {
-    color: '#16a34a',
-  },
-  expenseAmount: {
-    color: '#dc2626',
-  },
   categorySection: {
-    backgroundColor: '#ffffff',
     marginHorizontal: 16,
     marginBottom: 24,
     padding: 16,
@@ -227,7 +212,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1e293b',
     marginBottom: 16,
   },
   categoryItem: {
@@ -236,7 +220,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
   },
   categoryLeft: {
     flexDirection: 'row',
@@ -250,12 +233,10 @@ const styles = StyleSheet.create({
   },
   categoryName: {
     fontSize: 15,
-    color: '#475569',
   },
   categoryAmount: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#1e293b',
   },
   categoryItemLast: {
     borderBottomWidth: 0,
@@ -266,6 +247,5 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 14,
-    color: '#94a3b8',
   },
 });

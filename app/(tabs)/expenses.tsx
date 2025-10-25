@@ -4,10 +4,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { useApp } from '@/context/AppContext';
+import { useTheme } from '@/context/ThemeContext';
 import SwipeableCard from '@/components/SwipeableCard';
 
 export default function ExpensesScreen() {
   const { expenses, deleteExpense } = useApp();
+  const { theme } = useTheme();
   const swipeableRefs = useRef<Map<string, Swipeable>>(new Map());
 
   const renderExpenseItem = ({ item }: { item: typeof expenses[0] }) => (
@@ -24,10 +26,10 @@ export default function ExpensesScreen() {
   );
 
   return (
-    <View style={styles.container}>
-      <View style={styles.totalContainer}>
-        <Text style={styles.totalLabel}>Total Deductible Expenses</Text>
-        <Text style={styles.totalAmount}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <View style={[styles.totalContainer, { backgroundColor: theme.error }]}>
+        <Text style={[styles.totalLabel, { color: '#fecaca' }]}>Total Deductible Expenses</Text>
+        <Text style={[styles.totalAmount, { color: '#ffffff' }]}>
           ${expenses.reduce((sum, item) => sum + item.amount, 0).toLocaleString()}
         </Text>
       </View>
@@ -39,14 +41,14 @@ export default function ExpensesScreen() {
         contentContainerStyle={styles.listContainer}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Ionicons name="receipt-outline" size={64} color="#cbd5e1" />
-            <Text style={styles.emptyText}>No expense entries yet</Text>
+            <Ionicons name="receipt-outline" size={64} color={theme.borderLight} />
+            <Text style={[styles.emptyText, { color: theme.textTertiary }]}>No expense entries yet</Text>
           </View>
         }
       />
 
       <TouchableOpacity
-        style={styles.fab}
+        style={[styles.fab, { backgroundColor: theme.error }]}
         onPress={() => router.push('/add-expense')}
       >
         <Ionicons name="add" size={28} color="#ffffff" />
@@ -58,22 +60,18 @@ export default function ExpensesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
   },
   totalContainer: {
-    backgroundColor: '#dc2626',
     padding: 24,
     alignItems: 'center',
   },
   totalLabel: {
     fontSize: 14,
-    color: '#fecaca',
     marginBottom: 4,
   },
   totalAmount: {
     fontSize: 36,
     fontWeight: 'bold',
-    color: '#ffffff',
   },
   listContainer: {
     padding: 16,
@@ -87,7 +85,6 @@ const styles = StyleSheet.create({
   emptyText: {
     marginTop: 16,
     fontSize: 16,
-    color: '#94a3b8',
   },
   fab: {
     position: 'absolute',
@@ -96,7 +93,6 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#dc2626',
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',

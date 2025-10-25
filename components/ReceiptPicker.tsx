@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import { Attachment } from '@/context/AppContext';
+import { useTheme } from '@/context/ThemeContext';
 import { saveReceiptFile, getFileType, getFileSize, formatFileSize } from '@/utils/fileStorage';
 
 interface ReceiptPickerProps {
@@ -13,6 +14,7 @@ interface ReceiptPickerProps {
 }
 
 export default function ReceiptPicker({ attachments, onChange, required = true }: ReceiptPickerProps) {
+  const { theme } = useTheme();
   const [isProcessing, setIsProcessing] = useState(false);
 
   const generateId = () => {
@@ -152,37 +154,49 @@ export default function ReceiptPicker({ attachments, onChange, required = true }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>
-        Receipts / Invoices {required && <Text style={styles.required}>*</Text>}
+      <Text style={[styles.label, { color: theme.text }]}>
+        Receipts / Invoices {required && <Text style={[styles.required, { color: theme.error }]}>*</Text>}
       </Text>
 
       {/* Action Buttons */}
       <View style={styles.buttonsContainer}>
         <TouchableOpacity
-          style={[styles.actionButton, isProcessing && styles.buttonDisabled]}
+          style={[
+            styles.actionButton,
+            { backgroundColor: theme.primary + '20', borderColor: theme.primaryLight },
+            isProcessing && styles.buttonDisabled
+          ]}
           onPress={handleTakePhoto}
           disabled={isProcessing}
         >
-          <Ionicons name="camera" size={20} color="#2563eb" />
-          <Text style={styles.actionButtonText}>Take Photo</Text>
+          <Ionicons name="camera" size={20} color={theme.primary} />
+          <Text style={[styles.actionButtonText, { color: theme.primary }]}>Take Photo</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.actionButton, isProcessing && styles.buttonDisabled]}
+          style={[
+            styles.actionButton,
+            { backgroundColor: theme.primary + '20', borderColor: theme.primaryLight },
+            isProcessing && styles.buttonDisabled
+          ]}
           onPress={handleChooseFromGallery}
           disabled={isProcessing}
         >
-          <Ionicons name="images" size={20} color="#2563eb" />
-          <Text style={styles.actionButtonText}>Gallery</Text>
+          <Ionicons name="images" size={20} color={theme.primary} />
+          <Text style={[styles.actionButtonText, { color: theme.primary }]}>Gallery</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.actionButton, isProcessing && styles.buttonDisabled]}
+          style={[
+            styles.actionButton,
+            { backgroundColor: theme.primary + '20', borderColor: theme.primaryLight },
+            isProcessing && styles.buttonDisabled
+          ]}
           onPress={handleChooseDocument}
           disabled={isProcessing}
         >
-          <Ionicons name="document" size={20} color="#2563eb" />
-          <Text style={styles.actionButtonText}>Document</Text>
+          <Ionicons name="document" size={20} color={theme.primary} />
+          <Text style={[styles.actionButtonText, { color: theme.primary }]}>Document</Text>
         </TouchableOpacity>
       </View>
 
@@ -190,27 +204,27 @@ export default function ReceiptPicker({ attachments, onChange, required = true }
       {attachments.length > 0 && (
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.attachmentsList}>
           {attachments.map((attachment) => (
-            <View key={attachment.id} style={styles.attachmentCard}>
+            <View key={attachment.id} style={[styles.attachmentCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
               {attachment.type === 'image' ? (
                 <Image source={{ uri: attachment.uri }} style={styles.thumbnail} />
               ) : (
-                <View style={styles.documentPreview}>
-                  <Ionicons name={getIconForType(attachment.type) as any} size={40} color="#64748b" />
+                <View style={[styles.documentPreview, { backgroundColor: theme.input }]}>
+                  <Ionicons name={getIconForType(attachment.type) as any} size={40} color={theme.textSecondary} />
                 </View>
               )}
               <View style={styles.attachmentInfo}>
-                <Text style={styles.attachmentName} numberOfLines={1}>
+                <Text style={[styles.attachmentName, { color: theme.text }]} numberOfLines={1}>
                   {attachment.name}
                 </Text>
                 {attachment.size && (
-                  <Text style={styles.attachmentSize}>{formatFileSize(attachment.size)}</Text>
+                  <Text style={[styles.attachmentSize, { color: theme.textSecondary }]}>{formatFileSize(attachment.size)}</Text>
                 )}
               </View>
               <TouchableOpacity
                 style={styles.removeButton}
                 onPress={() => removeAttachment(attachment.id)}
               >
-                <Ionicons name="close-circle" size={24} color="#dc2626" />
+                <Ionicons name="close-circle" size={24} color={theme.error} />
               </TouchableOpacity>
             </View>
           ))}
@@ -219,10 +233,10 @@ export default function ReceiptPicker({ attachments, onChange, required = true }
 
       {/* Empty State */}
       {attachments.length === 0 && (
-        <View style={styles.emptyState}>
-          <Ionicons name="receipt-outline" size={48} color="#cbd5e1" />
-          <Text style={styles.emptyText}>No receipts added yet</Text>
-          {required && <Text style={styles.emptySubtext}>At least one receipt is required</Text>}
+        <View style={[styles.emptyState, { backgroundColor: theme.background, borderColor: theme.border }]}>
+          <Ionicons name="receipt-outline" size={48} color={theme.borderLight} />
+          <Text style={[styles.emptyText, { color: theme.textSecondary }]}>No receipts added yet</Text>
+          {required && <Text style={[styles.emptySubtext, { color: theme.textTertiary }]}>At least one receipt is required</Text>}
         </View>
       )}
     </View>
@@ -236,11 +250,10 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1e293b',
     marginBottom: 12,
   },
   required: {
-    color: '#dc2626',
+    // Color applied inline
   },
   buttonsContainer: {
     flexDirection: 'row',
@@ -252,9 +265,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#eff6ff',
     borderWidth: 1,
-    borderColor: '#bfdbfe',
     borderRadius: 8,
     padding: 12,
     gap: 6,
@@ -265,29 +276,24 @@ const styles = StyleSheet.create({
   actionButtonText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#2563eb',
   },
   attachmentsList: {
     marginBottom: 8,
   },
   attachmentCard: {
     width: 140,
-    backgroundColor: '#ffffff',
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
     marginRight: 12,
     overflow: 'hidden',
   },
   thumbnail: {
     width: '100%',
     height: 100,
-    backgroundColor: '#f1f5f9',
   },
   documentPreview: {
     width: '100%',
     height: 100,
-    backgroundColor: '#f1f5f9',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -297,12 +303,10 @@ const styles = StyleSheet.create({
   attachmentName: {
     fontSize: 12,
     fontWeight: '500',
-    color: '#1e293b',
     marginBottom: 2,
   },
   attachmentSize: {
     fontSize: 11,
-    color: '#64748b',
   },
   removeButton: {
     position: 'absolute',
@@ -314,21 +318,17 @@ const styles = StyleSheet.create({
   emptyState: {
     alignItems: 'center',
     padding: 32,
-    backgroundColor: '#f8fafc',
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
     borderStyle: 'dashed',
   },
   emptyText: {
     fontSize: 14,
-    color: '#64748b',
     marginTop: 8,
     fontWeight: '500',
   },
   emptySubtext: {
     fontSize: 12,
-    color: '#94a3b8',
     marginTop: 4,
   },
 });

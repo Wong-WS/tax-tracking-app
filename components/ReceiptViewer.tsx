@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Sharing from 'expo-sharing';
 import * as MediaLibrary from 'expo-media-library';
 import { Attachment } from '@/context/AppContext';
+import { useTheme } from '@/context/ThemeContext';
 import { formatFileSize } from '@/utils/fileStorage';
 
 interface ReceiptViewerProps {
@@ -16,6 +17,7 @@ interface ReceiptViewerProps {
 const { width, height } = Dimensions.get('window');
 
 export default function ReceiptViewer({ visible, attachments, initialIndex = 0, onClose }: ReceiptViewerProps) {
+  const { theme } = useTheme();
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
 
   if (!visible || attachments.length === 0) return null;
@@ -126,23 +128,23 @@ export default function ReceiptViewer({ visible, attachments, initialIndex = 0, 
             </ScrollView>
           ) : (
             <View style={styles.documentContainer}>
-              <Ionicons name={getIconForType(currentAttachment.type) as any} size={80} color="#94a3b8" />
+              <Ionicons name={getIconForType(currentAttachment.type) as any} size={80} color={theme.textTertiary} />
               <Text style={styles.documentText}>{currentAttachment.name}</Text>
-              <Text style={styles.documentType}>{currentAttachment.type.toUpperCase()}</Text>
+              <Text style={[styles.documentType, { color: theme.textSecondary }]}>{currentAttachment.type.toUpperCase()}</Text>
               {currentAttachment.size && (
-                <Text style={styles.documentSize}>{formatFileSize(currentAttachment.size)}</Text>
+                <Text style={[styles.documentSize, { color: theme.textTertiary }]}>{formatFileSize(currentAttachment.size)}</Text>
               )}
               <View style={styles.actionButtons}>
-                <TouchableOpacity style={styles.actionButton} onPress={handleShare}>
+                <TouchableOpacity style={[styles.actionButton, { backgroundColor: theme.primary }]} onPress={handleShare}>
                   <Ionicons name="open-outline" size={20} color="#ffffff" />
                   <Text style={styles.actionButtonText}>View</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={[styles.actionButton, styles.downloadButton]} onPress={handleDownload}>
+                <TouchableOpacity style={[styles.actionButton, { backgroundColor: theme.success }]} onPress={handleDownload}>
                   <Ionicons name="download-outline" size={20} color="#ffffff" />
                   <Text style={styles.actionButtonText}>Download</Text>
                 </TouchableOpacity>
               </View>
-              <Text style={styles.documentHint}>View opens the file in another app • Download saves to your device</Text>
+              <Text style={[styles.documentHint, { color: theme.textSecondary }]}>View opens the file in another app • Download saves to your device</Text>
             </View>
           )}
         </View>
@@ -239,12 +241,10 @@ const styles = StyleSheet.create({
   documentType: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#cbd5e1',
     marginTop: 8,
   },
   documentSize: {
     fontSize: 13,
-    color: '#94a3b8',
     marginTop: 4,
   },
   actionButtons: {
@@ -255,14 +255,10 @@ const styles = StyleSheet.create({
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#8b5cf6',
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 8,
     gap: 8,
-  },
-  downloadButton: {
-    backgroundColor: '#16a34a',
   },
   actionButtonText: {
     fontSize: 15,
@@ -271,7 +267,6 @@ const styles = StyleSheet.create({
   },
   documentHint: {
     fontSize: 12,
-    color: '#64748b',
     marginTop: 16,
     textAlign: 'center',
     paddingHorizontal: 24,

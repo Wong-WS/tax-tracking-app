@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Category } from '@/context/AppContext';
+import { useTheme } from '@/context/ThemeContext';
 
 interface CategoryItemProps {
   category: Category;
@@ -10,13 +11,15 @@ interface CategoryItemProps {
 }
 
 export default function CategoryItem({ category, usageCount, onDelete, canDelete }: CategoryItemProps) {
+  const { theme } = useTheme();
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.card }]}>
       <View style={styles.left}>
         <View style={[styles.colorDot, { backgroundColor: category.color }]} />
         <View style={styles.info}>
-          <Text style={styles.name}>{category.name}</Text>
-          <Text style={styles.count}>
+          <Text style={[styles.name, { color: theme.text }]}>{category.name}</Text>
+          <Text style={[styles.count, { color: theme.textSecondary }]}>
             {usageCount === 0
               ? 'No transactions'
               : `${usageCount} transaction${usageCount > 1 ? 's' : ''}`}
@@ -31,7 +34,7 @@ export default function CategoryItem({ category, usageCount, onDelete, canDelete
         <Ionicons
           name="trash-outline"
           size={20}
-          color={canDelete ? '#dc2626' : '#cbd5e1'}
+          color={canDelete ? theme.error : theme.borderLight}
         />
       </TouchableOpacity>
     </View>
@@ -43,7 +46,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#ffffff',
     padding: 16,
     borderRadius: 12,
     marginBottom: 8,
@@ -70,12 +72,10 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1e293b',
     marginBottom: 2,
   },
   count: {
     fontSize: 13,
-    color: '#64748b',
   },
   deleteButton: {
     padding: 8,

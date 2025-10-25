@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'rea
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useApp } from '@/context/AppContext';
+import { useTheme } from '@/context/ThemeContext';
 import CategoryItem from '@/components/CategoryItem';
 
 type TabType = 'expense' | 'income';
@@ -15,6 +16,7 @@ export default function CategoriesScreen() {
     deleteExpenseCategory,
     getCategoryUsageCount
   } = useApp();
+  const { theme } = useTheme();
 
   const [currentTab, setCurrentTab] = useState<TabType>('expense');
 
@@ -62,31 +64,47 @@ export default function CategoriesScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: theme.surface, borderBottomColor: theme.border }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#1e293b" />
+          <Ionicons name="arrow-back" size={24} color={theme.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Categories</Text>
+        <Text style={[styles.headerTitle, { color: theme.text }]}>Categories</Text>
         <View style={styles.backButton} />
       </View>
 
       {/* Tab Selector */}
       <View style={styles.tabContainer}>
         <TouchableOpacity
-          style={[styles.tab, currentTab === 'expense' && styles.tabActive]}
+          style={[
+            styles.tab,
+            { backgroundColor: theme.input },
+            currentTab === 'expense' && { backgroundColor: theme.primary }
+          ]}
           onPress={() => setCurrentTab('expense')}
         >
-          <Text style={[styles.tabText, currentTab === 'expense' && styles.tabTextActive]}>
+          <Text style={[
+            styles.tabText,
+            { color: theme.textSecondary },
+            currentTab === 'expense' && styles.tabTextActive
+          ]}>
             Expenses
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.tab, currentTab === 'income' && styles.tabActive]}
+          style={[
+            styles.tab,
+            { backgroundColor: theme.input },
+            currentTab === 'income' && { backgroundColor: theme.primary }
+          ]}
           onPress={() => setCurrentTab('income')}
         >
-          <Text style={[styles.tabText, currentTab === 'income' && styles.tabTextActive]}>
+          <Text style={[
+            styles.tabText,
+            { color: theme.textSecondary },
+            currentTab === 'income' && styles.tabTextActive
+          ]}>
             Income
           </Text>
         </TouchableOpacity>
@@ -96,8 +114,8 @@ export default function CategoriesScreen() {
       <ScrollView style={styles.content}>
         {categories.length === 0 ? (
           <View style={styles.emptyState}>
-            <Ionicons name="pricetags-outline" size={64} color="#cbd5e1" />
-            <Text style={styles.emptyText}>No categories yet</Text>
+            <Ionicons name="pricetags-outline" size={64} color={theme.borderLight} />
+            <Text style={[styles.emptyText, { color: theme.textTertiary }]}>No categories yet</Text>
           </View>
         ) : (
           categories.map((category) => {
@@ -116,7 +134,7 @@ export default function CategoriesScreen() {
       </ScrollView>
 
       {/* Add Category Button */}
-      <TouchableOpacity style={styles.addButton} onPress={handleAddCategory}>
+      <TouchableOpacity style={[styles.addButton, { backgroundColor: theme.primary }]} onPress={handleAddCategory}>
         <Ionicons name="add" size={20} color="#ffffff" />
         <Text style={styles.addButtonText}>Add Category</Text>
       </TouchableOpacity>
@@ -127,7 +145,6 @@ export default function CategoriesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
   },
   header: {
     flexDirection: 'row',
@@ -135,9 +152,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 16,
-    backgroundColor: '#ffffff',
     borderBottomWidth: 1,
-    borderBottomColor: '#e2e8f0',
   },
   backButton: {
     padding: 4,
@@ -146,7 +161,6 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1e293b',
   },
   tabContainer: {
     flexDirection: 'row',
@@ -157,16 +171,11 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 12,
     borderRadius: 8,
-    backgroundColor: '#f1f5f9',
     alignItems: 'center',
-  },
-  tabActive: {
-    backgroundColor: '#2563eb',
   },
   tabText: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#64748b',
   },
   tabTextActive: {
     color: '#ffffff',
@@ -183,13 +192,11 @@ const styles = StyleSheet.create({
   emptyText: {
     marginTop: 16,
     fontSize: 16,
-    color: '#94a3b8',
   },
   addButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#2563eb',
     margin: 16,
     padding: 16,
     borderRadius: 12,

@@ -11,6 +11,7 @@ import {
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '@/context/AppContext';
+import { useTheme } from '@/context/ThemeContext';
 import { COLOR_PALETTE } from '@/constants/categories';
 
 export default function AddCategoryScreen() {
@@ -18,6 +19,7 @@ export default function AddCategoryScreen() {
   const type = (params.type as 'income' | 'expense') || 'expense';
 
   const { addIncomeCategory, addExpenseCategory } = useApp();
+  const { theme } = useTheme();
 
   const [name, setName] = useState('');
   const [selectedColor, setSelectedColor] = useState(COLOR_PALETTE[0]);
@@ -50,47 +52,47 @@ export default function AddCategoryScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <View style={[styles.header, { backgroundColor: theme.surface, borderBottomColor: theme.border }]}>
         <TouchableOpacity onPress={handleCancel} style={styles.headerButton}>
-          <Ionicons name="close" size={24} color="#64748b" />
+          <Ionicons name="close" size={24} color={theme.textSecondary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Add Category</Text>
+        <Text style={[styles.headerTitle, { color: theme.text }]}>Add Category</Text>
         <TouchableOpacity onPress={handleSave} style={styles.headerButton}>
-          <Text style={styles.saveText}>Save</Text>
+          <Text style={[styles.saveText, { color: theme.primary }]}>Save</Text>
         </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.form} contentContainerStyle={styles.formContent}>
         {/* Category Name */}
         <View style={styles.fieldContainer}>
-          <Text style={styles.label}>Category Name</Text>
+          <Text style={[styles.label, { color: theme.textSecondary }]}>Category Name</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { backgroundColor: theme.input, borderColor: theme.inputBorder, color: theme.text }]}
             placeholder={type === 'income' ? 'e.g., Royalties' : 'e.g., Rent'}
             value={name}
             onChangeText={setName}
-            placeholderTextColor="#94a3b8"
+            placeholderTextColor={theme.placeholder}
             maxLength={20}
           />
-          <Text style={styles.helperText}>{name.length}/20 characters</Text>
+          <Text style={[styles.helperText, { color: theme.textTertiary }]}>{name.length}/20 characters</Text>
         </View>
 
         {/* Type Info */}
-        <View style={styles.infoBox}>
+        <View style={[styles.infoBox, { backgroundColor: theme.primary + '20' }]}>
           <Ionicons
             name={type === 'income' ? 'trending-up' : 'receipt-outline'}
             size={20}
-            color={type === 'income' ? '#2563eb' : '#dc2626'}
+            color={type === 'income' ? theme.primary : theme.error}
           />
-          <Text style={styles.infoText}>
+          <Text style={[styles.infoText, { color: theme.primary }]}>
             Adding to {type === 'income' ? 'Income' : 'Expense'} categories
           </Text>
         </View>
 
         {/* Color Picker */}
         <View style={styles.fieldContainer}>
-          <Text style={styles.label}>Choose Color</Text>
+          <Text style={[styles.label, { color: theme.textSecondary }]}>Choose Color</Text>
           <View style={styles.colorGrid}>
             {COLOR_PALETTE.map((color) => (
               <TouchableOpacity
@@ -98,7 +100,7 @@ export default function AddCategoryScreen() {
                 style={[
                   styles.colorButton,
                   { backgroundColor: color },
-                  selectedColor === color && styles.colorButtonSelected,
+                  selectedColor === color && [styles.colorButtonSelected, { borderColor: theme.text }],
                 ]}
                 onPress={() => setSelectedColor(color)}
               >
@@ -112,10 +114,10 @@ export default function AddCategoryScreen() {
 
         {/* Preview */}
         <View style={styles.fieldContainer}>
-          <Text style={styles.label}>Preview</Text>
-          <View style={styles.previewContainer}>
+          <Text style={[styles.label, { color: theme.textSecondary }]}>Preview</Text>
+          <View style={[styles.previewContainer, { backgroundColor: theme.card, borderColor: theme.cardBorder }]}>
             <View style={[styles.previewDot, { backgroundColor: selectedColor }]} />
-            <Text style={styles.previewText}>{name || 'Category Name'}</Text>
+            <Text style={[styles.previewText, { color: theme.text }]}>{name || 'Category Name'}</Text>
           </View>
         </View>
       </ScrollView>
@@ -126,7 +128,6 @@ export default function AddCategoryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
   },
   header: {
     flexDirection: 'row',
@@ -134,9 +135,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 16,
-    backgroundColor: '#ffffff',
     borderBottomWidth: 1,
-    borderBottomColor: '#e2e8f0',
   },
   headerButton: {
     padding: 4,
@@ -145,12 +144,10 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1e293b',
   },
   saveText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#2563eb',
     textAlign: 'right',
   },
   form: {
@@ -165,28 +162,22 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#475569',
     marginBottom: 8,
   },
   input: {
-    backgroundColor: '#ffffff',
     borderWidth: 1,
-    borderColor: '#e2e8f0',
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    color: '#1e293b',
   },
   helperText: {
     fontSize: 12,
-    color: '#94a3b8',
     marginTop: 4,
     textAlign: 'right',
   },
   infoBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#eff6ff',
     padding: 12,
     borderRadius: 8,
     marginBottom: 24,
@@ -194,7 +185,6 @@ const styles = StyleSheet.create({
   },
   infoText: {
     fontSize: 14,
-    color: '#1e40af',
   },
   colorGrid: {
     flexDirection: 'row',
@@ -210,16 +200,13 @@ const styles = StyleSheet.create({
   },
   colorButtonSelected: {
     borderWidth: 3,
-    borderColor: '#1e293b',
   },
   previewContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
     padding: 16,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
   },
   previewDot: {
     width: 12,
@@ -230,6 +217,5 @@ const styles = StyleSheet.create({
   previewText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1e293b',
   },
 });

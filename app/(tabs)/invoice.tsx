@@ -17,12 +17,14 @@ import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
 import { useApp } from '@/context/AppContext';
+import { useTheme } from '@/context/ThemeContext';
 import { router } from 'expo-router';
 import { saveReceiptFile } from '@/utils/fileStorage';
 import { Attachment } from '@/context/AppContext';
 
 export default function InvoiceScreen() {
   const { addIncome } = useApp();
+  const { theme } = useTheme();
   const clientNameInputRef = useRef<TextInput>(null);
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -301,7 +303,7 @@ export default function InvoiceScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: theme.background }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 20}
     >
@@ -311,19 +313,19 @@ export default function InvoiceScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.header}>
-          <Ionicons name="document-text" size={40} color="#2563eb" />
-          <Text style={styles.headerTitle}>Invoice Generator</Text>
-          <Text style={styles.headerSubtitle}>Create professional invoices for your clients</Text>
+        <View style={[styles.header, { backgroundColor: theme.card, borderBottomColor: theme.border }]}>
+          <Ionicons name="document-text" size={40} color={theme.primary} />
+          <Text style={[styles.headerTitle, { color: theme.text }]}>Invoice Generator</Text>
+          <Text style={[styles.headerSubtitle, { color: theme.textSecondary }]}>Create professional invoices for your clients</Text>
         </View>
 
         <View style={styles.form}>
         {/* Date Paid */}
         <View style={styles.field}>
-          <Text style={styles.label}>Date Paid</Text>
-          <TouchableOpacity style={styles.dateButton} onPress={() => setShowDatePicker(true)}>
-            <Ionicons name="calendar-outline" size={20} color="#64748b" />
-            <Text style={styles.dateText}>{date.toLocaleDateString()}</Text>
+          <Text style={[styles.label, { color: theme.text }]}>Date Paid</Text>
+          <TouchableOpacity style={[styles.dateButton, { backgroundColor: theme.input, borderColor: theme.inputBorder }]} onPress={() => setShowDatePicker(true)}>
+            <Ionicons name="calendar-outline" size={20} color={theme.textSecondary} />
+            <Text style={[styles.dateText, { color: theme.text }]}>{date.toLocaleDateString()}</Text>
           </TouchableOpacity>
         </View>
 
@@ -339,27 +341,27 @@ export default function InvoiceScreen() {
 
         {/* Client Name */}
         <View style={styles.field}>
-          <Text style={styles.label}>Client Name</Text>
+          <Text style={[styles.label, { color: theme.text }]}>Client Name</Text>
           <TextInput
             ref={clientNameInputRef}
-            style={styles.input}
+            style={[styles.input, { backgroundColor: theme.input, borderColor: theme.inputBorder, color: theme.text }]}
             value={clientName}
             onChangeText={setClientName}
             placeholder="Enter client name"
-            placeholderTextColor="#94a3b8"
+            placeholderTextColor={theme.placeholder}
             returnKeyType="next"
           />
         </View>
 
         {/* Description */}
         <View style={styles.field}>
-          <Text style={styles.label}>Description</Text>
+          <Text style={[styles.label, { color: theme.text }]}>Description</Text>
           <TextInput
-            style={[styles.input, styles.textArea]}
+            style={[styles.input, styles.textArea, { backgroundColor: theme.input, borderColor: theme.inputBorder, color: theme.text }]}
             value={description}
             onChangeText={setDescription}
             placeholder="Enter service/product description"
-            placeholderTextColor="#94a3b8"
+            placeholderTextColor={theme.placeholder}
             multiline
             numberOfLines={4}
             textAlignVertical="top"
@@ -368,15 +370,15 @@ export default function InvoiceScreen() {
 
         {/* Amount Received */}
         <View style={styles.field}>
-          <Text style={styles.label}>Amount Received</Text>
-          <View style={styles.amountInputContainer}>
-            <Text style={styles.currencySymbol}>$</Text>
+          <Text style={[styles.label, { color: theme.text }]}>Amount Received</Text>
+          <View style={[styles.amountInputContainer, { backgroundColor: theme.input, borderColor: theme.inputBorder }]}>
+            <Text style={[styles.currencySymbol, { color: theme.textSecondary }]}>$</Text>
             <TextInput
-              style={styles.amountInput}
+              style={[styles.amountInput, { color: theme.text }]}
               value={amount}
               onChangeText={setAmount}
               placeholder="0.00"
-              placeholderTextColor="#94a3b8"
+              placeholderTextColor={theme.placeholder}
               keyboardType="decimal-pad"
             />
           </View>
@@ -384,19 +386,19 @@ export default function InvoiceScreen() {
 
         {/* Payment Reference */}
         <View style={styles.field}>
-          <Text style={styles.label}>Payment Reference</Text>
+          <Text style={[styles.label, { color: theme.text }]}>Payment Reference</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { backgroundColor: theme.input, borderColor: theme.inputBorder, color: theme.text }]}
             value={paymentReference}
             onChangeText={setPaymentReference}
             placeholder="e.g., Bank Transfer, PayPal, Cash"
-            placeholderTextColor="#94a3b8"
+            placeholderTextColor={theme.placeholder}
           />
         </View>
 
         {/* Generate Button */}
         <TouchableOpacity
-          style={[styles.generateButton, isGenerating && styles.generateButtonDisabled]}
+          style={[styles.generateButton, { backgroundColor: theme.primary }, isGenerating && styles.generateButtonDisabled]}
           onPress={handleGenerateInvoice}
           disabled={isGenerating}
         >
@@ -418,7 +420,6 @@ export default function InvoiceScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
   },
   scrollView: {
     flex: 1,
@@ -428,21 +429,17 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   header: {
-    backgroundColor: '#ffffff',
     padding: 24,
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: '#e2e8f0',
   },
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#1e293b',
     marginTop: 12,
   },
   headerSubtitle: {
     fontSize: 14,
-    color: '#64748b',
     marginTop: 4,
     textAlign: 'center',
   },
@@ -455,26 +452,20 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1e293b',
     marginBottom: 8,
   },
   input: {
-    backgroundColor: '#ffffff',
     borderWidth: 1,
-    borderColor: '#e2e8f0',
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    color: '#1e293b',
   },
   textArea: {
     minHeight: 100,
     paddingTop: 12,
   },
   dateButton: {
-    backgroundColor: '#ffffff',
     borderWidth: 1,
-    borderColor: '#e2e8f0',
     borderRadius: 8,
     padding: 12,
     flexDirection: 'row',
@@ -483,12 +474,9 @@ const styles = StyleSheet.create({
   },
   dateText: {
     fontSize: 16,
-    color: '#1e293b',
   },
   amountInputContainer: {
-    backgroundColor: '#ffffff',
     borderWidth: 1,
-    borderColor: '#e2e8f0',
     borderRadius: 8,
     flexDirection: 'row',
     alignItems: 'center',
@@ -497,17 +485,14 @@ const styles = StyleSheet.create({
   currencySymbol: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#64748b',
     marginRight: 4,
   },
   amountInput: {
     flex: 1,
     padding: 12,
     fontSize: 16,
-    color: '#1e293b',
   },
   generateButton: {
-    backgroundColor: '#2563eb',
     borderRadius: 8,
     padding: 16,
     flexDirection: 'row',

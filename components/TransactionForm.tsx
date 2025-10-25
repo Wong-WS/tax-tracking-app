@@ -14,6 +14,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useApp, Transaction, Attachment } from '@/context/AppContext';
+import { useTheme } from '@/context/ThemeContext';
 import ReceiptPicker from '@/components/ReceiptPicker';
 import { deleteTransactionReceipts } from '@/utils/fileStorage';
 
@@ -24,6 +25,7 @@ interface TransactionFormProps {
 
 export default function TransactionForm({ type, mode }: TransactionFormProps) {
   const { addIncome, updateIncome, addExpense, updateExpense, incomeCategories, expenseCategories } = useApp();
+  const { theme } = useTheme();
   const params = useLocalSearchParams();
   const descriptionInputRef = useRef<TextInput>(null);
   const originalAttachmentsRef = useRef<Attachment[]>([]);
@@ -162,12 +164,12 @@ export default function TransactionForm({ type, mode }: TransactionFormProps) {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <View style={[styles.header, { backgroundColor: theme.surface, borderBottomColor: theme.border }]}>
         <TouchableOpacity onPress={handleCancel} style={styles.headerButton}>
-          <Ionicons name="close" size={24} color="#64748b" />
+          <Ionicons name="close" size={24} color={theme.textSecondary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{config.title}</Text>
+        <Text style={[styles.headerTitle, { color: theme.text }]}>{config.title}</Text>
         <TouchableOpacity onPress={handleSave} style={styles.headerButton}>
           <Text style={[styles.saveText, { color: config.saveColor }]}>
             Save
@@ -188,43 +190,43 @@ export default function TransactionForm({ type, mode }: TransactionFormProps) {
         >
         {/* Description Input */}
         <View style={styles.fieldContainer}>
-          <Text style={styles.label}>Description</Text>
+          <Text style={[styles.label, { color: theme.textSecondary }]}>Description</Text>
           <TextInput
             ref={descriptionInputRef}
-            style={styles.input}
+            style={[styles.input, { backgroundColor: theme.input, borderColor: theme.inputBorder, color: theme.text }]}
             placeholder={config.placeholder}
             value={description}
             onChangeText={setDescription}
-            placeholderTextColor="#94a3b8"
+            placeholderTextColor={theme.placeholder}
             returnKeyType="next"
           />
         </View>
 
         {/* Amount Input */}
         <View style={styles.fieldContainer}>
-          <Text style={styles.label}>Amount</Text>
-          <View style={styles.amountContainer}>
-            <Text style={styles.currencySymbol}>$</Text>
+          <Text style={[styles.label, { color: theme.textSecondary }]}>Amount</Text>
+          <View style={[styles.amountContainer, { backgroundColor: theme.input, borderColor: theme.inputBorder }]}>
+            <Text style={[styles.currencySymbol, { color: theme.textSecondary }]}>$</Text>
             <TextInput
-              style={styles.amountInput}
+              style={[styles.amountInput, { color: theme.text }]}
               placeholder="0.00"
               value={amount}
               onChangeText={setAmount}
               keyboardType="decimal-pad"
-              placeholderTextColor="#94a3b8"
+              placeholderTextColor={theme.placeholder}
             />
           </View>
         </View>
 
         {/* Date Picker */}
         <View style={styles.fieldContainer}>
-          <Text style={styles.label}>Date</Text>
+          <Text style={[styles.label, { color: theme.textSecondary }]}>Date</Text>
           <TouchableOpacity
-            style={styles.dateButton}
+            style={[styles.dateButton, { backgroundColor: theme.input, borderColor: theme.inputBorder }]}
             onPress={() => setShowDatePicker(true)}
           >
-            <Ionicons name="calendar-outline" size={20} color="#64748b" />
-            <Text style={styles.dateText}>{date.toLocaleDateString()}</Text>
+            <Ionicons name="calendar-outline" size={20} color={theme.textSecondary} />
+            <Text style={[styles.dateText, { color: theme.text }]}>{date.toLocaleDateString()}</Text>
           </TouchableOpacity>
           {showDatePicker && (
             <DateTimePicker
@@ -238,13 +240,14 @@ export default function TransactionForm({ type, mode }: TransactionFormProps) {
 
         {/* Category Picker */}
         <View style={styles.fieldContainer}>
-          <Text style={styles.label}>Category</Text>
+          <Text style={[styles.label, { color: theme.textSecondary }]}>Category</Text>
           <View style={styles.categoryContainer}>
             {categories.map((cat) => (
               <TouchableOpacity
                 key={cat.id}
                 style={[
                   styles.categoryChip,
+                  { backgroundColor: theme.input, borderColor: theme.inputBorder },
                   category === cat.name && [
                     styles.categoryChipActive,
                     { backgroundColor: config.saveColor, borderColor: config.saveColor },
@@ -255,6 +258,7 @@ export default function TransactionForm({ type, mode }: TransactionFormProps) {
                 <Text
                   style={[
                     styles.categoryChipText,
+                    { color: theme.textSecondary },
                     category === cat.name && styles.categoryChipTextActive,
                   ]}
                 >
@@ -282,7 +286,6 @@ export default function TransactionForm({ type, mode }: TransactionFormProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
   },
   header: {
     flexDirection: 'row',
@@ -290,9 +293,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 16,
-    backgroundColor: '#ffffff',
     borderBottomWidth: 1,
-    borderBottomColor: '#e2e8f0',
   },
   headerButton: {
     padding: 4,
@@ -301,7 +302,6 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1e293b',
   },
   saveText: {
     fontSize: 16,
@@ -324,31 +324,24 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#475569',
     marginBottom: 8,
   },
   input: {
-    backgroundColor: '#ffffff',
     borderWidth: 1,
-    borderColor: '#e2e8f0',
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    color: '#1e293b',
   },
   amountContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
     borderWidth: 1,
-    borderColor: '#e2e8f0',
     borderRadius: 8,
     paddingLeft: 12,
   },
   currencySymbol: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#64748b',
     marginRight: 4,
   },
   amountInput: {
@@ -357,21 +350,17 @@ const styles = StyleSheet.create({
     paddingLeft: 4,
     fontSize: 20,
     fontWeight: '600',
-    color: '#1e293b',
   },
   dateButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
     borderWidth: 1,
-    borderColor: '#e2e8f0',
     borderRadius: 8,
     padding: 12,
     gap: 8,
   },
   dateText: {
     fontSize: 16,
-    color: '#1e293b',
   },
   categoryContainer: {
     flexDirection: 'row',
@@ -382,16 +371,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: '#ffffff',
     borderWidth: 1,
-    borderColor: '#e2e8f0',
   },
   categoryChipActive: {
     // Dynamic background and border color applied inline
   },
   categoryChipText: {
     fontSize: 14,
-    color: '#64748b',
     fontWeight: '500',
   },
   categoryChipTextActive: {

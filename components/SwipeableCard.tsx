@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { Transaction } from '@/context/AppContext';
+import { useTheme } from '@/context/ThemeContext';
 import ReceiptViewer from './ReceiptViewer';
 
 interface SwipeableCardProps {
@@ -14,12 +15,13 @@ interface SwipeableCardProps {
 }
 
 export default function SwipeableCard({ item, type, onDelete, swipeableRef }: SwipeableCardProps) {
+  const { theme } = useTheme();
   const isIncome = type === 'income';
   const internalRef = useRef<Swipeable | null>(null);
   const [viewerVisible, setViewerVisible] = useState(false);
 
   const config = {
-    amountColor: isIncome ? '#16a34a' : '#dc2626',
+    amountColor: isIncome ? theme.success : theme.error,
     amountPrefix: isIncome ? '+' : '-',
     editRoute: isIncome ? '/edit-income' : '/edit-expense',
     paramKey: isIncome ? 'income' : 'expense',
@@ -65,14 +67,14 @@ export default function SwipeableCard({ item, type, onDelete, swipeableRef }: Sw
     return (
       <View style={styles.actionsContainer}>
         <TouchableOpacity
-          style={[styles.actionButton, styles.editButton]}
+          style={[styles.actionButton, { backgroundColor: theme.primary }]}
           onPress={handleEdit}
         >
           <Ionicons name="pencil" size={20} color="#ffffff" />
           <Text style={styles.actionText}>Edit</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.actionButton, styles.deleteButton]}
+          style={[styles.actionButton, { backgroundColor: theme.error }]}
           onPress={handleDelete}
         >
           <Ionicons name="trash" size={20} color="#ffffff" />
@@ -94,11 +96,11 @@ export default function SwipeableCard({ item, type, onDelete, swipeableRef }: Sw
         renderRightActions={renderRightActions}
         overshootRight={false}
       >
-        <View style={styles.card}>
+        <View style={[styles.card, { backgroundColor: theme.card }]}>
           <View style={styles.cardHeader}>
             <View style={styles.infoSection}>
-              <Text style={styles.description}>{item.description}</Text>
-              <Text style={styles.category}>{item.category}</Text>
+              <Text style={[styles.description, { color: theme.text }]}>{item.description}</Text>
+              <Text style={[styles.category, { color: theme.textSecondary }]}>{item.category}</Text>
             </View>
             <View style={styles.rightSection}>
               <Text style={[styles.amount, { color: config.amountColor }]}>
@@ -108,23 +110,23 @@ export default function SwipeableCard({ item, type, onDelete, swipeableRef }: Sw
           </View>
 
           <View style={styles.cardFooter}>
-            <Text style={styles.date}>{new Date(item.date).toLocaleDateString()}</Text>
+            <Text style={[styles.date, { color: theme.textTertiary }]}>{new Date(item.date).toLocaleDateString()}</Text>
 
             {/* Receipt Thumbnail and Badge */}
             {hasAttachments && (
               <TouchableOpacity
-                style={styles.receiptBadge}
+                style={[styles.receiptBadge, { borderColor: theme.border }]}
                 onPress={() => setViewerVisible(true)}
               >
                 {firstAttachment?.type === 'image' ? (
                   <Image source={{ uri: firstAttachment.uri }} style={styles.thumbnail} />
                 ) : (
-                  <View style={styles.documentThumbnail}>
-                    <Ionicons name="document-text" size={16} color="#8b5cf6" />
+                  <View style={[styles.documentThumbnail, { backgroundColor: theme.primary + '20' }]}>
+                    <Ionicons name="document-text" size={16} color={theme.primary} />
                   </View>
                 )}
                 {item.attachments && item.attachments.length > 1 && (
-                  <View style={styles.countBadge}>
+                  <View style={[styles.countBadge, { backgroundColor: theme.primary }]}>
                     <Text style={styles.countText}>{item.attachments.length}</Text>
                   </View>
                 )}
@@ -148,7 +150,6 @@ export default function SwipeableCard({ item, type, onDelete, swipeableRef }: Sw
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#ffffff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -173,12 +174,10 @@ const styles = StyleSheet.create({
   description: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1e293b',
     marginBottom: 4,
   },
   category: {
     fontSize: 14,
-    color: '#64748b',
   },
   amount: {
     fontSize: 20,
@@ -192,7 +191,6 @@ const styles = StyleSheet.create({
   },
   date: {
     fontSize: 13,
-    color: '#94a3b8',
   },
   receiptBadge: {
     position: 'relative',
@@ -201,7 +199,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: '#e2e8f0',
   },
   thumbnail: {
     width: '100%',
@@ -210,7 +207,6 @@ const styles = StyleSheet.create({
   documentThumbnail: {
     width: '100%',
     height: '100%',
-    backgroundColor: '#f3e8ff',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -218,7 +214,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -4,
     right: -4,
-    backgroundColor: '#8b5cf6',
     borderRadius: 10,
     minWidth: 20,
     height: 20,
@@ -241,12 +236,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 12,
     marginLeft: 8,
-  },
-  editButton: {
-    backgroundColor: '#2563eb',
-  },
-  deleteButton: {
-    backgroundColor: '#dc2626',
   },
   actionText: {
     color: '#ffffff',

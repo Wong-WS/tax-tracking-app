@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -7,11 +7,15 @@ import {
   TouchableOpacity,
   ScrollView,
   Platform,
+  Alert,
+  KeyboardAvoidingView,
 } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { useApp, Transaction } from '@/context/AppContext';
+import { useApp, Transaction, Attachment } from '@/context/AppContext';
+import ReceiptPicker from '@/components/ReceiptPicker';
+import { deleteTransactionReceipts } from '@/utils/fileStorage';
 
 interface TransactionFormProps {
   type: 'income' | 'expense';
@@ -21,6 +25,7 @@ interface TransactionFormProps {
 export default function TransactionForm({ type, mode }: TransactionFormProps) {
   const { addIncome, updateIncome, addExpense, updateExpense, incomeCategories, expenseCategories } = useApp();
   const params = useLocalSearchParams();
+  const descriptionInputRef = useRef<TextInput>(null);
 
   const categories = type === 'income' ? incomeCategories : expenseCategories;
 
@@ -32,6 +37,7 @@ export default function TransactionForm({ type, mode }: TransactionFormProps) {
     categories[0]?.name || ''
   );
   const [transactionId, setTransactionId] = useState('');
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
   const isIncome = type === 'income';
   const isEdit = mode === 'edit';
 
@@ -64,6 +70,9 @@ export default function TransactionForm({ type, mode }: TransactionFormProps) {
           setAmount(data.amount.toString());
           setDate(new Date(data.date));
           setCategory(data.category);
+          if (data.attachments) {
+            setAttachments(data.attachments);
+          }
         } catch (error) {
           console.error('Error parsing transaction data:', error);
         }
@@ -73,14 +82,30 @@ export default function TransactionForm({ type, mode }: TransactionFormProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.income, params.expense, isEdit, isIncome]);
 
+  // Auto-focus on Description field when in add mode
+  useEffect(() => {
+    if (!isEdit) {
+      const timer = setTimeout(() => {
+        descriptionInputRef.current?.focus();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [isEdit]);
+
   const handleSave = () => {
     // Validation
     if (!description.trim()) {
-      alert('Please enter a description');
+      Alert.alert('Error', 'Please enter a description');
       return;
     }
     if (!amount || parseFloat(amount) <= 0) {
-      alert('Please enter a valid amount');
+      Alert.alert('Error', 'Please enter a valid amount');
+      return;
+    }
+
+    // For expenses, require at least one attachment
+    if (!isIncome && attachments.length === 0) {
+      Alert.alert('Receipt Required', 'Please attach at least one receipt or invoice for this expense.');
       return;
     }
 
@@ -89,6 +114,7 @@ export default function TransactionForm({ type, mode }: TransactionFormProps) {
       amount: parseFloat(amount),
       date: date.toISOString().split('T')[0],
       category,
+      attachments: !isIncome ? attachments : undefined, // Only include attachments for expenses
     };
 
     // Call appropriate Context method
@@ -135,16 +161,28 @@ export default function TransactionForm({ type, mode }: TransactionFormProps) {
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.form} contentContainerStyle={styles.formContent}>
+      <KeyboardAvoidingView
+        style={styles.keyboardAvoid}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 20}
+      >
+        <ScrollView
+          style={styles.form}
+          contentContainerStyle={styles.formContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
         {/* Description Input */}
         <View style={styles.fieldContainer}>
           <Text style={styles.label}>Description</Text>
           <TextInput
+            ref={descriptionInputRef}
             style={styles.input}
             placeholder={config.placeholder}
             value={description}
             onChangeText={setDescription}
             placeholderTextColor="#94a3b8"
+            returnKeyType="next"
           />
         </View>
 
@@ -212,7 +250,17 @@ export default function TransactionForm({ type, mode }: TransactionFormProps) {
             ))}
           </View>
         </View>
+
+        {/* Receipt Picker - only for expenses */}
+        {!isIncome && (
+          <ReceiptPicker
+            attachments={attachments}
+            onChange={setAttachments}
+            required={true}
+          />
+        )}
       </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 }
@@ -246,11 +294,15 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'right',
   },
+  keyboardAvoid: {
+    flex: 1,
+  },
   form: {
     flex: 1,
   },
   formContent: {
     padding: 16,
+    paddingBottom: 40,
   },
   fieldContainer: {
     marginBottom: 24,

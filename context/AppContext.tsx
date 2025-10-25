@@ -1,14 +1,25 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Category, DEFAULT_INCOME_CATEGORIES, DEFAULT_EXPENSE_CATEGORIES } from '@/constants/categories';
+import { deleteTransactionReceipts } from '@/utils/fileStorage';
 
 // Types
+export interface Attachment {
+  id: string;
+  uri: string;
+  name: string;
+  type: 'image' | 'pdf' | 'document';
+  size?: number;
+  mimeType?: string;
+}
+
 export interface Transaction {
   id: string;
   description: string;
   amount: number;
   date: string;
   category: string;
+  attachments?: Attachment[]; // Optional for backward compatibility with existing data
 }
 
 export type { Category };
@@ -148,7 +159,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     );
   };
 
-  const deleteIncome = (id: string) => {
+  const deleteIncome = async (id: string) => {
+    // Find the income to delete its attachments
+    const incomeItem = income.find(i => i.id === id);
+    if (incomeItem?.attachments) {
+      await deleteTransactionReceipts(incomeItem.attachments);
+    }
     setIncome((prev) => prev.filter((item) => item.id !== id));
   };
 
@@ -169,7 +185,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     );
   };
 
-  const deleteExpense = (id: string) => {
+  const deleteExpense = async (id: string) => {
+    // Find the expense to delete its receipts
+    const expense = expenses.find(e => e.id === id);
+    if (expense?.attachments) {
+      await deleteTransactionReceipts(expense.attachments);
+    }
     setExpenses((prev) => prev.filter((item) => item.id !== id));
   };
 

@@ -19,7 +19,6 @@ export default function SummaryScreen() {
   const totalIncome = income.reduce((sum, item) => sum + item.amount, 0);
   const totalExpenses = expenses.reduce((sum, item) => sum + item.amount, 0);
   const netIncome = totalIncome - totalExpenses;
-  const estimatedTax = netIncome * 0.25; // Simple 25% estimate
 
   // Group expenses by category
   const expensesByCategory = expenses.reduce((acc, expense) => {
@@ -38,8 +37,8 @@ export default function SummaryScreen() {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Tax Year 2025</Text>
-        <Text style={styles.headerSubtitle}>Financial Summary</Text>
+        <Text style={styles.headerTitle}>Summary</Text>
+        <Text style={styles.headerSubtitle}>Your financial overview</Text>
       </View>
 
       {/* Net Income Card */}
@@ -72,18 +71,6 @@ export default function SummaryScreen() {
             ${totalExpenses.toLocaleString()}
           </Text>
         </View>
-      </View>
-
-      {/* Tax Estimate Card */}
-      <View style={styles.taxCard}>
-        <View style={styles.taxHeader}>
-          <Ionicons name="calculator-outline" size={28} color="#f59e0b" />
-          <Text style={styles.taxTitle}>Estimated Tax</Text>
-        </View>
-        <Text style={styles.taxAmount}>${estimatedTax.toLocaleString()}</Text>
-        <Text style={styles.taxDisclaimer}>
-          Based on 25% tax rate. This is an estimate only.
-        </Text>
       </View>
 
       {/* Breakdown by Category */}
@@ -211,37 +198,6 @@ const styles = StyleSheet.create({
   },
   expenseAmount: {
     color: '#dc2626',
-  },
-  taxCard: {
-    backgroundColor: '#fffbeb',
-    marginHorizontal: 16,
-    padding: 20,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#fde68a',
-    marginBottom: 24,
-  },
-  taxHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-    gap: 8,
-  },
-  taxTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#92400e',
-  },
-  taxAmount: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#b45309',
-    marginBottom: 8,
-  },
-  taxDisclaimer: {
-    fontSize: 12,
-    color: '#92400e',
-    fontStyle: 'italic',
   },
   categorySection: {
     backgroundColor: '#ffffff',
